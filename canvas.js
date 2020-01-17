@@ -31,3 +31,24 @@ context.stroke();
 context.beginPath();
 context.arc(300, 100, 30, 0, Math.PI * 2);
 context.stroke();
+
+let isAddMode = true;
+let coordinateX = 10;
+function animateCanvas() {
+  requestAnimationFrame(animateCanvas);
+  // This will also remove first chapes already built
+  context.clearRect(0, 0, innerWidth, innerHeight);
+  drawRectangle(context, coordinateX, 400, 50, 50);
+  if (coordinateX >= 500) {
+    isAddMode = false;
+  } else if (coordinateX <= 10) {
+    isAddMode = true;
+  }
+  if (isAddMode) {
+    coordinateX += 15;
+  } else {
+    coordinateX -= 15;
+  }
+}
+
+animateCanvas();
