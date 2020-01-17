@@ -18,3 +18,9 @@ function drawRectangle(
 drawRectangle(context, 10, 200, 500, 50);
 
 console.log(canvas);
+
+// Line
+context.beginPath();
+context.moveTo(30, 30);
+context.lineTo(100, 100);
+context.stroke();
