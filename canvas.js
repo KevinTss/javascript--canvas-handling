@@ -12,6 +12,7 @@ function drawRectangle(
   rectSizeX,
   rectSizeY
 ) {
+  context.fillStyle = "#A48B74";
   return context.fillRect(positionFromX, positionFromY, rectSizeX, rectSizeY);
 }
 
@@ -23,4 +24,5 @@ console.log(canvas);
 context.beginPath();
 context.moveTo(30, 30);
 context.lineTo(100, 100);
+context.strokeStyle = "#E4CCAC";
 context.stroke();
