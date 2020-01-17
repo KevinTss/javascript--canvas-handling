@@ -26,3 +26,8 @@ context.moveTo(30, 30);
 context.lineTo(100, 100);
 context.strokeStyle = "#E4CCAC";
 context.stroke();
+
+// Arc
+context.beginPath();
+context.arc(300, 100, 30, 0, Math.PI * 2);
+context.stroke();
