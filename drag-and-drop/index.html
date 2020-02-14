@@ -34,49 +34,14 @@
         overflow: hidden;
         border-radius: 7px;
         touch-action: none;
-      }
-
-      .item {
-        border-radius: 50%;
-        touch-action: none;
-        user-select: none;
         position: relative;
       }
 
-      .one {
-        width: 100px;
-        height: 100px;
-        background-color: rgb(245, 230, 99);
-        border: 10px solid rgba(136, 136, 136, 0.5);
-        top: 0px;
-        left: 0px;
-      }
-
-      .two {
-        width: 60px;
-        height: 60px;
-        background-color: rgba(196, 241, 190, 1);
-        border: 10px solid rgba(136, 136, 136, 0.5);
-        top: 30%;
-        left: 10%;
-      }
-
-      .three {
-        width: 40px;
-        height: 40px;
-        background-color: rgb(0, 255, 231);
-        border: 10px solid rgba(136, 136, 136, 0.5);
-        top: -40%;
-        left: -10%;
-      }
-
-      .four {
-        width: 80px;
-        height: 80px;
-        background-color: rgb(233, 210, 244);
-        border: 10px solid rgba(136, 136, 136, 0.5);
-        top: -10%;
-        left: 5%;
+      .item {
+        touch-action: none;
+        user-select: none;
+        position: relative;
+        cursor: pointer;
       }
 
       .item:active {
@@ -93,16 +58,36 @@
       <li><a href="../">Back</a></li>
     </ul>
     <div id="outerContainer">
-      <div id="container">
-        <div class="item one"></div>
-        <div class="item two"></div>
-        <div class="item three"></div>
-        <div class="item four"></div>
-      </div>
+      <div id="container"></div>
     </div>
 
     <script>
+      const COLORS = ["#333333", "#E9D2F4", "#F4E663", "#C4F1BE"];
+      const mockData = [
+        {
+          idx: 1,
+          h: 200,
+          r: 0,
+          w: 200,
+          x: 200,
+          y: 0,
+          shapeType: "rectangle",
+          text: "Rectangle 1"
+        },
+        {
+          idx: 2,
+          h: 0,
+          r: 50,
+          w: 0,
+          x: 0,
+          y: 100,
+          shapeType: "circle",
+          text: "Circle 1"
+        }
+      ];
+
       const container = document.querySelector("#container");
+      generateShapes(mockData);
       let activeItem = null;
 
       let active = false;
@@ -116,6 +101,7 @@
       container.addEventListener("mousemove", drag, false);
 
       function dragStart(e) {
+        console.log("dragStart");
         if (e.target === e.currentTarget) return;
 
         active = true;
@@ -142,6 +128,7 @@
       }
 
       function dragEnd(e) {
+        console.log("dragEnd");
         if (activeItem !== null) {
           activeItem.initialX = activeItem.currentX;
           activeItem.initialY = activeItem.currentY;
@@ -152,9 +139,11 @@
       }
 
       function drag(e) {
+        console.log("drag");
         if (!active) return;
 
         e.preventDefault();
+        // console.dir(activeItem);
 
         if (e.type === "touchmove") {
           activeItem.currentX = e.touches[0].clientX - activeItem.initialX;
@@ -173,6 +162,26 @@
           "px, " +
           activeItem.currentY +
           "px, 0)";
+      }
+
+      function generateShapes(shapes) {
+        shapes.forEach(shape => {
+          const el = document.createElement("div");
+          el.style.position = "absolute";
+          if (shape.shapeType === "rectangle") {
+            el.style.width = `${shape.w}px`;
+            el.style.height = `${shape.h}px`;
+          } else if (shape.shapeType === "circle") {
+            el.style.width = `${shape.r * 2}px`;
+            el.style.height = `${shape.r * 2}px`;
+            el.style.borderRadius = "50%";
+          }
+          el.style.left = `${shape.x}px`;
+          el.style.top = `${shape.y}px`;
+          el.style.backgroundColor = COLORS[shape.idx % COLORS.length];
+          el.setAttribute("class", "item");
+          container.appendChild(el);
+        });
       }
     </script>
   </body>
