@@ -62,6 +62,7 @@
     </div>
 
     <script>
+      const BOUNDING_THICKNESS = 10;
       const COLORS = ["#333333", "#E9D2F4", "#F4E663", "#C4F1BE"];
       const mockData = [
         {
@@ -88,9 +89,16 @@
 
       const container = document.querySelector("#container");
       generateShapes(mockData);
-      let activeItem = null;
 
+      let activeItem = null;
       let active = false;
+      /*
+        Mode is to help to know which element is drag,
+        could be a shape (`shape`) in that case we just drag
+        it. Could be a bound-left, we have to resize base
+        on left border. Same logic for others bound
+      */
+      let activeMode = null;
 
       container.addEventListener("touchstart", dragStart, false);
       container.addEventListener("touchend", dragEnd, false);
@@ -102,13 +110,22 @@
 
       function dragStart(e) {
         console.log("dragStart");
+        // console.log(e.target);
+        // console.log(e.target.boundingElement);
+        // console.log(e.currentTarget);
         if (e.target === e.currentTarget) return;
 
         active = true;
-        activeItem = e.target;
+        if (e.target.boundingElement) {
+          activeItem = document.getElementById(e.target.idParent);
+          activeMode = e.target.boundingElement;
+        } else {
+          activeItem = e.target;
+          activeMode = "shape";
+        }
 
         if (!activeItem) return;
-
+        // console.log("activeItem", activeItem.xOffset);
         if (!activeItem.xOffset) {
           activeItem.xOffset = 0;
         }
@@ -136,6 +153,7 @@
 
         active = false;
         activeItem = null;
+        activeMode = null;
       }
 
       function drag(e) {
@@ -153,15 +171,21 @@
           activeItem.currentY = e.clientY - activeItem.initialY;
         }
 
-        activeItem.xOffset = activeItem.currentX;
-        activeItem.yOffset = activeItem.currentY;
-
-        activeItem.style.transform =
-          "translate3d(" +
-          activeItem.currentX +
-          "px, " +
-          activeItem.currentY +
-          "px, 0)";
+        if (activeMode === "shape") {
+          activeItem.xOffset = activeItem.currentX;
+          activeItem.yOffset = activeItem.currentY;
+          activeItem.style.transform = `translate3d(${activeItem.currentX}px, ${activeItem.currentY}px, 0)`;
+        } else if (activeMode === "bound-top") {
+          if (!activeItem.currentY) return; // inferior to 0 mean out of container
+          const currentHeight = parseInt(
+            activeItem.style.height.replace("px", "")
+          );
+          const heightToAdd = activeItem.yOffset - activeItem.currentY;
+          const newHeight = currentHeight + heightToAdd;
+          activeItem.style.height = `${newHeight}px`;
+          activeItem.yOffset = activeItem.currentY;
+          activeItem.style.transform = `translate3d(${activeItem.xOffset}px, ${activeItem.currentY}px, 0)`;
+        }
       }
 
       function generateShapes(shapes) {
@@ -180,8 +204,32 @@
           el.style.top = `${shape.y}px`;
           el.style.backgroundColor = COLORS[shape.idx % COLORS.length];
           el.setAttribute("class", "item");
+          el.setAttribute("id", shape.idx);
           container.appendChild(el);
+          addBoundingRectToEl(el);
         });
+      }
+
+      function addBoundingRectToEl(el) {
+        console.log("el", el.style);
+        el.appendChild(getTopBoundingHandler(el));
+      }
+
+      function getTopBoundingHandler(el) {
+        const boundingTop = document.createElement("div");
+        const targetElementWidth = el.style.width;
+        if (!targetElementWidth.endsWith("px")) return;
+        const pixelWidth = parseInt(targetElementWidth.replace("px", ""));
+        boundingTop.style.width = `${BOUNDING_THICKNESS}px`;
+        boundingTop.style.height = `${BOUNDING_THICKNESS}px`;
+        boundingTop.style.position = "absolute";
+        boundingTop.style.top = `${BOUNDING_THICKNESS / -2}px`;
+        boundingTop.style.left = `${pixelWidth / 2 - BOUNDING_THICKNESS / 2}px`;
+        boundingTop.style.backgroundColor = `red`;
+        boundingTop.boundingElement = "bound-top";
+        boundingTop.idParent = el.id;
+
+        return boundingTop;
       }
     </script>
   </body>
