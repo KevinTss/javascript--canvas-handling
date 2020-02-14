@@ -154,9 +154,9 @@
       function drag(e) {
         if (!active) return;
 
-        if (e.type === "touchmove") {
-          e.preventDefault();
+        e.preventDefault();
 
+        if (e.type === "touchmove") {
           activeItem.currentX = e.touches[0].clientX - activeItem.initialX;
           activeItem.currentY = e.touches[0].clientY - activeItem.initialY;
         } else {
