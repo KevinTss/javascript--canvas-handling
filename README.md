@@ -1,4 +1,6 @@
-# Canvas
+# Javascript
+
+This repo is use to experiment some javascript code
 
 Discover how canvas are working
 
