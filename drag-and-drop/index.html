@@ -41,15 +41,15 @@
         touch-action: none;
         user-select: none;
         position: relative;
-        cursor: pointer;
+        cursor: grab;
+      }
+
+      .item:active {
+        cursor: grabbing;
       }
 
       .item:active {
         opacity: 0.75;
-      }
-
-      .item:hover {
-        cursor: pointer;
       }
     </style>
   </head>
@@ -110,12 +110,11 @@
 
       function dragStart(e) {
         console.log("dragStart");
-        // console.log(e.target);
-        // console.log(e.target.boundingElement);
-        // console.log(e.currentTarget);
+
         if (e.target === e.currentTarget) return;
 
         active = true;
+
         if (e.target.boundingElement) {
           activeItem = document.getElementById(e.target.idParent);
           activeMode = e.target.boundingElement;
@@ -125,7 +124,7 @@
         }
 
         if (!activeItem) return;
-        // console.log("activeItem", activeItem.xOffset);
+
         if (!activeItem.xOffset) {
           activeItem.xOffset = 0;
         }
@@ -138,7 +137,6 @@
           activeItem.initialX = e.touches[0].clientX - activeItem.xOffset;
           activeItem.initialY = e.touches[0].clientY - activeItem.yOffset;
         } else {
-          // console.log("doing something!");
           activeItem.initialX = e.clientX - activeItem.xOffset;
           activeItem.initialY = e.clientY - activeItem.yOffset;
         }
@@ -161,7 +159,6 @@
         if (!active) return;
 
         e.preventDefault();
-        // console.dir(activeItem);
 
         if (e.type === "touchmove") {
           activeItem.currentX = e.touches[0].clientX - activeItem.initialX;
@@ -185,6 +182,16 @@
           activeItem.style.height = `${newHeight}px`;
           activeItem.yOffset = activeItem.currentY;
           activeItem.style.transform = `translate3d(${activeItem.xOffset}px, ${activeItem.currentY}px, 0)`;
+        } else if (activeMode === "bound-left") {
+          if (!activeItem.currentX) return;
+          const currentWidth = parseInt(
+            activeItem.style.width.replace("px", "")
+          );
+          const widthToAdd = activeItem.xOffset - activeItem.currentX;
+          const newWidth = currentWidth + widthToAdd;
+          activeItem.style.width = `${newWidth}px`;
+          activeItem.xOffset = activeItem.currentX;
+          activeItem.style.transform = `translate3d(${activeItem.currentX}px, ${activeItem.yOffset}px, 0)`;
         }
       }
 
@@ -211,8 +218,8 @@
       }
 
       function addBoundingRectToEl(el) {
-        console.log("el", el.style);
         el.appendChild(getTopBoundingHandler(el));
+        el.appendChild(getLeftBoundingHandler(el));
       }
 
       function getTopBoundingHandler(el) {
@@ -225,12 +232,30 @@
         boundingTop.style.position = "absolute";
         boundingTop.style.cursor = "n-resize";
         boundingTop.style.top = `${BOUNDING_THICKNESS / -2}px`;
-        boundingTop.style.left = `${pixelWidth / 2 - BOUNDING_THICKNESS / 2}px`;
+        boundingTop.style.left = `calc(50% - ${BOUNDING_THICKNESS / 2}px)`;
         boundingTop.style.backgroundColor = `red`;
         boundingTop.boundingElement = "bound-top";
         boundingTop.idParent = el.id;
 
         return boundingTop;
+      }
+
+      function getLeftBoundingHandler(el) {
+        const boundingLeft = document.createElement("div");
+        const targetElementHeight = el.style.height;
+        if (!targetElementHeight.endsWith("px")) return;
+        const pixelHeight = parseInt(targetElementHeight.replace("px", ""));
+        boundingLeft.style.width = `${BOUNDING_THICKNESS}px`;
+        boundingLeft.style.height = `${BOUNDING_THICKNESS}px`;
+        boundingLeft.style.position = "absolute";
+        boundingLeft.style.cursor = "w-resize";
+        boundingLeft.style.left = `${BOUNDING_THICKNESS / -2}px`;
+        boundingLeft.style.top = `calc(50% - ${BOUNDING_THICKNESS / 2}px)`;
+        boundingLeft.style.backgroundColor = `blue`;
+        boundingLeft.boundingElement = "bound-left";
+        boundingLeft.idParent = el.id;
+
+        return boundingLeft;
       }
     </script>
   </body>
